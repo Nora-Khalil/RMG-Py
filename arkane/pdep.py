@@ -56,7 +56,7 @@ from arkane.sensitivity import PDepSensitivity as SensAnalysis
 class PressureDependenceJob(object):
     """
     A representation of a pressure dependence job. The attributes are:
-    
+
     ======================= ====================================================
     Attribute               Description
     ======================= ====================================================
@@ -82,23 +82,23 @@ class PressureDependenceJob(object):
     `Plist`                 An array of pressures at which to compute :math:`k(T,P)` values
     `Elist`                 An array of energies to use to compute :math:`k(T,P)` values
     ======================= ====================================================
-    
+
     In RMG mode, several alterations to the k(T,P) algorithm are made both for
     speed and due to the nature of the approximations used:
-    
+
     * Densities of states are not computed for product channels
-    
+
     * Arbitrary rigid rotor moments of inertia are included in the active modes;
       these cancel in the ILT and equilibrium expressions
-    
+
     * k(E) for each path reaction is computed in the direction A -> products,
       where A is always an explored isomer; the high-P kinetics are reversed
       if necessary for this purpose
-    
+
     * Thermodynamic parameters are always used to compute the reverse k(E)
       from the forward k(E) for each path reaction
-    
-    RMG mode should be turned off by default except in RMG jobs.    
+
+    RMG mode should be turned off by default except in RMG jobs.
     """
 
     def __init__(self, network,
@@ -106,7 +106,8 @@ class PressureDependenceJob(object):
                  Pmin=None, Pmax=None, Pcount=0, Plist=None,
                  maximumGrainSize=None, minimumGrainCount=0,
                  method=None, interpolationModel=None, maximumAtoms=None,
-                 activeKRotor=True, activeJRotor=True, rmgmode=False, sensitivity_conditions=None):
+                 activeKRotor=True, activeJRotor=True, rmgmode=False, sensitivity_conditions=None,
+                 sensitivity_perturbation=0):
 
         if len(network.products) > 0:
             if method in "simulation least squares":
@@ -118,11 +119,17 @@ class PressureDependenceJob(object):
                               used with product channels. Please specify all bimolecular channels as
                               reactant channels.""")
 
+
         self.network = network
 
         self.Tmin = Tmin
         self.Tmax = Tmax
         self.Tcount = Tcount
+        if sensitivity_perturbation == 0:
+            self.sensitivity_perturbation = quantity.Quantity(2.0,'kcal/mol')
+        else:
+            self.sensitivity_perturbation = quantity.Quantity(sensitivity_perturbation)
+
         if Tlist is not None:
             self.Tlist = Tlist
             self.Tmin = (np.min(self.Tlist.value_si), "K")
@@ -632,8 +639,8 @@ class PressureDependenceJob(object):
         Generate a PDF drawing of the pressure-dependent reaction network.
         This requires that Cairo and its Python wrapper be available; if not,
         the drawing is not generated.
-        
-        You may also generate different formats of drawings, by changing format to 
+
+        You may also generate different formats of drawings, by changing format to
         one of the following: `pdf`, `svg`, `png`.
         """
 
