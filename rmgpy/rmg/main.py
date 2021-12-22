@@ -1158,20 +1158,11 @@ class RMG(util.Subject):
 
                         old_edge_size = len(self.reaction_model.edge.reactions)
                         old_core_size = len(self.reaction_model.core.reactions)
-<<<<<<< HEAD
-                        self.reaction_model.enlarge(
-                            react_edge=True,
-                            unimolecular_react=self.unimolecular_react,
-                            bimolecular_react=self.bimolecular_react,
-                            trimolecular_react=self.trimolecular_react,
-                        )
-=======
                         self.reaction_model.enlarge(react_edge=True,
                                                     unimolecular_react=self.unimolecular_react,
                                                     bimolecular_react=self.bimolecular_react,
                                                     trimolecular_react=self.trimolecular_react)
                         self.check_thermo_valid()
->>>>>>> 5f50b01dc (added `check_thermo_valid` to rmg main to ensure thermo model is valid over the temp range of the reacting system)
 
                         if old_edge_size != len(self.reaction_model.edge.reactions) or old_core_size != len(self.reaction_model.core.reactions):
                             reactor_done = False

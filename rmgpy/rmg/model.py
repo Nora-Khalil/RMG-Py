@@ -1985,8 +1985,16 @@ class CoreEdgeReactionModel:
         while index < core_reaction_count:
             reaction = self.core.reactions[index]
             if isinstance(reaction, PDepReaction):
-                for reaction2 in self.core.reactions[index + 1 :]:
-                    if isinstance(reaction2, PDepReaction) and reaction.reactants == reaction2.products and reaction.products == reaction2.reactants:
+                if np.isnan(reaction.kinetics.get_rate_coefficient(1000.0,1e5)):
+                    # this reaction kinetics are undefined, dont add to the core
+                    logging.warning(f"pdep reaction {reaction} has invalid kinetics and will be removed from the core: {reaction.kinetics}")
+                    self.core.reactions.remove(reaction)
+                    core_reaction_count -= 1
+                    index += 1
+                    continue
+                for reaction2 in self.core.reactions[index + 1:]:
+                    if isinstance(reaction2,
+                                  PDepReaction) and reaction.reactants == reaction2.products and reaction.products == reaction2.reactants:
                         # We've found the PDepReaction for the reverse direction
                         dGrxn = reaction.get_free_energy_of_reaction(300.0)
                         kf = reaction.get_rate_coefficient(1000, 1e5)
