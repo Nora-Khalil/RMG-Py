@@ -148,6 +148,7 @@ cdef class KineticsModel:
         """
         return (KineticsModel, (self.Tmin, self.Tmax, self.Pmin, self.Pmax, self.uncertainty, self.solute, self.comment))
 
+
     property Tmin:
         """The minimum temperature at which the model is valid, or ``None`` if not defined."""
         def __get__(self):

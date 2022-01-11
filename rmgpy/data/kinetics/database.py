@@ -94,6 +94,7 @@ class KineticsDatabase(object):
             'KineticsModel': KineticsModel,
             'Marcus': Marcus,
             'RateUncertainty': RateUncertainty,
+
         }
         self.global_context = {}
 
