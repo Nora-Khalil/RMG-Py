@@ -321,9 +321,22 @@ end""")
 
     kmat = unravel_ks(np.exp(out.x),keqs,len(network.isomers+network.reactants))
 
-    u = get_uncertainties(kmat,xssource,dxdtsource)
+    u = get_uncertainties(kmat,xssource,dxdtssource)
 
     return kmat,u
+
+def get_uncertainties(kmat,xssource,dxdtssource):
+    """
+    approximate the independent factor uncertainty in individual
+    rate coefficients
+    """
+    u = np.zeros(kmat.shape)
+    for i,x in enumerate(xssource):
+        flux = calcfluxes(kmat,x)
+        dxdt = dxdtssource[i]
+        for j in range(len(xssource)):
+            u[j,i] = np.exp(np.abs(np.log(dxdt[j]/flux[j])))
+    return u
 
 def ravel_kmat(kmat,n_isomreac):
     """
