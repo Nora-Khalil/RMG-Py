@@ -180,7 +180,7 @@ class TestMain(unittest.TestCase):
         outName = os.path.join(self.rmg.output_directory, 'cantera')
         files = os.listdir(outName)
         for f in files:
-            if '.cti' in f:
+            if '.yaml' in f:
                 try:
                     ct.Solution(os.path.join(outName, f))
                 except:
@@ -492,7 +492,7 @@ CH3(4)              2     144.001     3.800     0.000     0.000     0.000    ! G
         Tests that good and bad chemkin files raise proper exceptions
         """
 
-        from cantera.ck2cti import InputParseError
+        from cantera.ck2yaml import InputError
 
         for ck_input, works in self.chemkin_files.items():
             os.chdir(originalPath)
@@ -510,7 +510,7 @@ CH3(4)              2     144.001     3.800     0.000     0.000     0.000    ! G
             if works:
                 self.rmg.generate_cantera_files(os.path.join(os.getcwd(), 'chem001.inp'))
             else:
-                with self.assertRaises(InputParseError):
+                with self.assertRaises(InputError):
                     self.rmg.generate_cantera_files(os.path.join(os.getcwd(), 'chem001.inp'))
 
             # clean up
