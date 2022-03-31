@@ -6,7 +6,7 @@ channels:
 dependencies:
   - cairo
   - cairocffi
-  - rmg::cantera >=2.3.0
+  - cantera >=2.5.0
   - conda-forge::cclib >=1.6.3
   - rmg::chemprop
   - coolprop
