@@ -80,6 +80,7 @@ from rmgpy.tools.plot import plot_sensitivity
 from rmgpy.tools.uncertainty import Uncertainty, process_local_results
 from rmgpy.yml import RMSWriter
 from rmgpy.rmg.reactors import Reactor
+from rmgpy.yml_test import YAMLWriter
 
 ################################################################################
 
@@ -686,6 +687,7 @@ class RMG(util.Subject):
 
         self.attach(ChemkinWriter(self.output_directory))
         self.attach(RMSWriter(self.output_directory))
+        self.attach(YAMLWriter(self.output_directory))
 
         if self.generate_output_html:
             self.attach(OutputHTMLWriter(self.output_directory))
