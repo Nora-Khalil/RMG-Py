@@ -1,0 +1,24 @@
+Global RMG Settings:
+   database.directory   = /Users/nora/RMG/RMG-database/input (Default, relative to RMG-Py source code)
+   test_data.directory  = /Users/nora/RMG/RMG-Py/rmgpy/test_data (Default, relative to RMG-Py source code)
+RMG execution initiated at Tue Feb  1 12:50:44 2022
+
+#########################################################
+# RMG-Py - Reaction Mechanism Generator in Python       #
+# Version: 3.1.0                                        #
+# Authors: RMG Developers (rmg_dev@mit.edu)             #
+# P.I.s:   William H. Green (whgreen@mit.edu)           #
+#          Richard H. West (r.west@neu.edu)             #
+# Website: http://reactionmechanismgenerator.github.io/ #
+#########################################################
+
+The current git HEAD for RMG-Py is:
+	b'c4ba26c4e0bde03d9d8d5867875e2df2ce5d4079'
+	b'Wed Jan 12 19:00:00 2022 -0500'
+
+The current git HEAD for RMG-database is:
+	b'd975a8469dc1586260c68d9f5bacee7798b774ac'
+	b'Thu Jan 13 14:25:05 2022 -0500'
+
+Error: The input file "/Users/nora/RMG/RMG-Py/c2h6.py" could not be opened.
+Check that the file exists and that you have read access.
