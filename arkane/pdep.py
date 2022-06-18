@@ -42,7 +42,7 @@ import numpy as np
 import rmgpy.quantity as quantity
 from rmgpy.chemkin import write_kinetics_entry
 from rmgpy.data.kinetics.library import LibraryReaction
-from rmgpy.exceptions import InvalidMicrocanonicalRateError, ModifiedStrongCollisionError, PressureDependenceError
+from rmgpy.exceptions import InputError, InvalidMicrocanonicalRateError, ModifiedStrongCollisionError, PressureDependenceError
 from rmgpy.kinetics import Chebyshev, PDepArrhenius
 from rmgpy.reaction import Reaction
 from rmgpy.kinetics.tunneling import Wigner, Eckart
@@ -107,6 +107,17 @@ class PressureDependenceJob(object):
                  maximumGrainSize=None, minimumGrainCount=0,
                  method=None, interpolationModel=None, maximumAtoms=None,
                  activeKRotor=True, activeJRotor=True, rmgmode=False, sensitivity_conditions=None):
+
+        if len(network.products) > 0:
+            if method in "simulation least squares":
+                raise InputError("""The current simulation least squares implementation should not be
+                              used with product channels. Please specify all bimolecular channels as
+                              reactant channels.""")
+            elif method == "chemically-significant eigenvalues georgievskii":
+                raise InputError("""The chemically-significant eigenvalues georgievskii method cannot be
+                              used with product channels. Please specify all bimolecular channels as
+                              reactant channels.""")
+
         self.network = network
 
         self.Tmin = Tmin
