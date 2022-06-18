@@ -36,6 +36,7 @@ import scipy.sparse as sparse
 import numpy as np
 cimport numpy as np
 import scipy.linalg
+import scipy.sparse as sparse
 from libc.math cimport exp, sqrt
 
 import rmgpy.constants as constants
