@@ -404,5 +404,5 @@ cdef class Troe(PDepKineticsModel):
             T2 = self.T2.value_si
             falloff = ct.TroeFalloff(params=[A, T3, T1, T2])
 
-        rate = ct.TroeRate(hihj=high_rate, low=low_rate, falloff_coeffs=falloff)
+        rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=falloff)
         
