@@ -145,12 +145,30 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
          #doesn't work for fall-off reactions :( will have to do something else for that 
         try: 
             s  = obj.to_cantera()
-            reacton_data = s.input_data
-            return reacton_data
+            reaction_data = s.input_data
+            return reaction_data
+            
         except: 
-            if isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann): 
-                print('********veryyyyy interesting')
-                #result_dict
+            if isinstance(obj.kinetics, Troe):# or isinstance(obj.kinetics, Lindemann): 
+                reaction_data = obj.kinetics.write_cantera_inputs(str(obj)) 
+                return reaction_data
+
+                # import cantera as ct
+                # high_rate = obj.kinetics.arrheniusHigh.to_cantera_kinetics()
+                # low_rate = obj.kinetics.arrheniusLow.to_cantera_kinetics()
+                # A = obj.kinetics.alpha
+                # T3 = obj.kinetics.T3.value_si
+                # T1 = obj.kinetics.T1.value_si
+                # if obj.kinetics.T2 is None:
+                #     #falloff = ct.TroeFalloff(params=[A, T3, T1]) 
+                #     rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1])
+                # else:
+                #     T2 = obj.kinetics.T2.value_si
+                #     rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1,T2])
+                #     #falloff = ct.TroeFalloff(params=[A, T3, T1, T2])
+                # R = ct.Reaction(equation=str(obj), rate=rate)
+                # return R.input_data
+                # #result_dict
             else:
                 print('********passing**********')
             return result_dict
