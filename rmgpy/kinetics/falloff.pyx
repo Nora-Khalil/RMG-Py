@@ -220,6 +220,8 @@ cdef class Lindemann(PDepKineticsModel):
         self.arrheniusLow.change_rate(factor)
         self.arrheniusHigh.change_rate(factor)
 
+
+
     def set_cantera_kinetics(self, ct_reaction, species_list):
         """
         Sets the efficiencies and kinetics for a cantera reaction.
@@ -230,7 +232,21 @@ cdef class Lindemann(PDepKineticsModel):
         ct_reaction.efficiencies = PDepKineticsModel.get_cantera_efficiencies(self, species_list)
         ct_reaction.high_rate = self.arrheniusHigh.to_cantera_kinetics()
         ct_reaction.low_rate = self.arrheniusLow.to_cantera_kinetics()
-        ct_reaction.falloff = ct.Falloff()
+
+        high_rate = self.arrheniusHigh.to_cantera_kinetics()
+        low_rate = self.arrheniusLow.to_cantera_kinetics()
+        falloff = []
+        ct_reaction.rate = self.to_cantera_kinetics(low_rate,high_rate,falloff) 
+        
+
+
+    def to_cantera_kinetics(self, low, high, falloff): 
+        """
+        Converts the Lindemann object to a cantera Lindemann object
+        """
+        import cantera as ct
+        return ct.LindemannRate(low, high, falloff)
+
 
 ################################################################################
 
@@ -399,34 +415,24 @@ cdef class Troe(PDepKineticsModel):
         T3 = self.T3.value_si
         T1 = self.T1.value_si
         if self.T2 is None:
-            falloff = ct.TroeFalloff(params=[A, T3, T1]) 
+            #rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1])
+            #falloff = ct.TroeFalloff(params=[A, T3, T1]) 
+            falloff = [A, T3, T1]
         else:
             T2 = self.T2.value_si
-            falloff = ct.TroeFalloff(params=[A, T3, T1, T2])
+            #rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1,T2])
+            #falloff = ct.TroeFalloff(params=[A, T3, T1, T2])
+            falloff = [A, T3, T1, T2]
 
-        rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=falloff)
-        
-    
-    def write_cantera_inputs(self,equation_string):
+        ct_reaction.rate = self.to_cantera_kinetics(low_rate,high_rate,falloff) 
+
+    def to_cantera_kinetics(self, low, high, falloff): 
         """
-        returns a dictionary with equation, type, low-P-rate-constant, high-P-rate_constant, Troe values for Troe reactions 
+        Converts the Troe object to a cantera Troe object
         """
         import cantera as ct
-        high_rate = self.arrheniusHigh.to_cantera_kinetics()
-        low_rate = self.arrheniusLow.to_cantera_kinetics()
-        A = self.alpha
-        T3 = self.T3.value_si
-        T1 = self.T1.value_si
-        if self.T2 is None:
-            rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1])
-        else:
-            T2 = self.T2.value_si
-            rate = ct.TroeRate(high=high_rate, low=low_rate, falloff_coeffs=[A,T3,T1,T2])
-        R = ct.Reaction(equation=equation_string, rate=rate)
-        return R.input_data
-
+        return ct.TroeRate(high=high, low=low, falloff_coeffs=falloff)
         
-
     
 
         
