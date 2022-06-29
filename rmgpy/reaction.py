@@ -290,8 +290,7 @@ class Reaction:
                 ct_reaction = ct.ElementaryReaction(reactants=ct_reactants, products=ct_products)
             elif isinstance(self.kinetics, MultiArrhenius):
                 # Return a list of elementary reactions which are duplicates
-                ct_reaction = [ct.ElementaryReaction(reactants=ct_reactants, products=ct_products)
-                               for arr in self.kinetics.arrhenius]
+                ct_reaction = [ct.ElementaryReaction(reactants=ct_reactants, products=ct_products) for arr in self.kinetics.arrhenius]
 
             elif isinstance(self.kinetics, PDepArrhenius):
                 ct_reaction = ct.PlogReaction(reactants=ct_reactants, products=ct_products)
