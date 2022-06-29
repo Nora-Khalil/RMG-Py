@@ -145,22 +145,24 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
         try: 
             s  = obj.to_cantera()
             reaction_data = s.input_data
-            if isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann):
-                print(type(obj.kinetics))
-                print(str(obj))
+            if isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann) or isinstance(obj.kinetics, ThirdBody):
+                 result_dict["efficiencies"] = {spcs[i].label: float(val) for i, val in enumerate(obj.kinetics.get_effective_collider_efficiencies(spcs)) if val != 1}
+                 print('Done correctly')    
+            reaction_data.update(result_dict)
             return reaction_data
+
+
 
             
         except: 
             if isinstance(obj.kinetics, Troe): 
-                print('this was a troe that was missed')
+                 print('this was a troe that was missed')
       
             if isinstance(obj.kinetics, Lindemann):
-                import cantera as ct
-                print('there was a lindemann, did not do s.obj')
+                 print('there was a lindemann, did not do s.obj')
             
             else:
-                print('********passing**********')
+                 print('********passing**********')
             return result_dict
             
 
