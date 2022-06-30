@@ -143,16 +143,24 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
 
     if isinstance(obj, Reaction):
         try:
-            s  = obj.to_cantera() 
-            if isinstance(obj.kinetics, Arrhenius) or isinstance(obj.kinetics, Chebyshev):
-                reaction_data = s.input_data
-            elif isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann) or isinstance(obj.kinetics, ThirdBody):
-                reaction_data = s.input_data
-                result_dict["efficiencies"] = {spcs[i].label: float(val) for i, val in enumerate(obj.kinetics.get_effective_collider_efficiencies(spcs)) if val != 1}
-                print('Done correctly')    
-            elif isinstance(obj.kinetics, MultiArrhenius):
+
+            if isinstance(obj.kinetics, MultiArrhenius) or isinstance(obj.kinetics, MultiPDepArrhenius):
+                s  = obj.to_cantera()
                 for i,idx in enumerate(s):
                     reaction_data = s[i].input_data
+            elif isinstance(obj.kinetics, StickingCoefficient):
+                reaction_data = dict()
+                result_dict['equation'] = str(obj)
+            else:   
+                s  = obj.to_cantera()
+                reaction_data = s.input_data
+
+            if isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann) or isinstance(obj.kinetics, ThirdBody):
+                result_dict["efficiencies"] = {spcs[i].label: float(val) for i, val in enumerate(obj.kinetics.get_effective_collider_efficiencies(spcs)) if val != 1}
+            
+            reaction_data.pop('equation', None) #delete equation belonging to cantera object
+            result_dict['equation'] = str(obj)   # replace with equation that includes RMG labels, so Sticking Coefficients won't mess the whole thing up 
+            
             reaction_data.update(result_dict)
             return reaction_data
 
