@@ -96,7 +96,7 @@ elements:
 - symbol: X
   atomic-weight: 195.083
 
-        '''
+'''
         f.write(block4)
         yaml.dump(result_dict, stream=f)
 
@@ -173,67 +173,6 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
             print(str(obj))
             return result_dict
             
-
-        # if str(s._reaction_type) != 'elementary':
-        #     result_dict['type'] = s._reaction_type
-        #     if s.duplicate == True: 
-        #         result_dict['duplicate'] = 'true'
-            
-
-
-
-
-
-    # elif isinstance(obj, Troe):
-    #     result_dict["type"] = "Troe"
-    #     result_dict["arrhigh"] = obj_to_dict(obj.arrheniusHigh, spcs)
-    #     result_dict["arrlow"] = obj_to_dict(obj.arrheniusLow, spcs)
-    #     result_dict["efficiencies"] = {spcs[i].label: float(val)
-    #                                    for i, val in enumerate(obj.get_effective_collider_efficiencies(spcs)) if val != 1}
-    #     result_dict["a"] = obj.alpha
-    #     result_dict["T1"] = obj.T1.value_si
-    #     if obj.T2:
-    #         result_dict["T2"] = obj.T2.value_si
-    #     else:
-    #         result_dict["T2"] = 0.0
-    #     result_dict["T3"] = obj.T3.value_si
-    # elif isinstance(obj, Chebyshev):
-    #     result_dict["type"] = "Chebyshev"
-    #     result_dict["coefs"] = obj.coeffs.value_si.tolist()
-    #     result_dict["Tmin"] = obj.Tmin.value_si
-    #     result_dict["Tmax"] = obj.Tmax.value_si
-    #     result_dict["Pmin"] = obj.Pmin.value_si
-    #     result_dict["Pmax"] = obj.Pmax.value_si
-    # elif isinstance(obj, Wilhoit):
-    #     result_dict["type"] = "Wilhoit"
-    #     result_dict["coefs"] = [obj.a0, obj.a1, obj.a2, obj.a3]
-    #     result_dict["Cp0"] = obj.Cp0.value_si
-    #     result_dict["Cpinf"] = obj.CpInf.value_si
-    #     result_dict["H0"] = obj.H0.value_si
-    #     result_dict["S0"] = obj.S0.value_si
-    #     result_dict["B"] = obj.B.value_si
-    # elif isinstance(obj, SolventData):
-    #     result_dict["type"] = "Solvent"
-    #     result_dict["name"] = label
-    #     viscosity = dict()
-    #     viscosity["type"] = "RiedelViscosity"
-    #     viscosity["A"] = float(obj.A)
-    #     viscosity["B"] = float(obj.B)
-    #     viscosity["C"] = float(obj.C)
-    #     viscosity["D"] = float(obj.D)
-    #     viscosity["E"] = float(obj.E)
-    #     result_dict["mu"] = viscosity
-    # elif obj is None:
-    #     return None
-    # else:
-    #     raise ValueError("Object of type {} does not have a defined conversion to "
-    #                      "ReactionMechanismSimulator format".format(type(obj)))
-  # return result_dict
-
-
-
-
-
 
 class CanteraWriter(object):
     """
