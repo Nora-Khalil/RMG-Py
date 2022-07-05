@@ -327,7 +327,6 @@ class Reaction:
                 else:
                      ct_reaction = ct.FalloffReaction(reactants=ct_reactants, products=ct_products,rate=rate)
 
-            #surfaceArrhenius
             elif isinstance(self.kinetics, SurfaceArrhenius):
                 # Create an surface reaction
                 A = self.kinetics._A.value_si
@@ -335,6 +334,13 @@ class Reaction:
                 Ea = self.kinetics._Ea.value_si * 1000  # convert from J/mol to J/kmol
                 rate = ct.Arrhenius(A, b, Ea)
                 ct_reaction = ct.InterfaceReaction(equation=str(self), rate=rate)
+
+            elif isinstance(self.kinetics, StickingCoefficient):
+                A = self.kinetics._A.value_si
+                b = self.kinetics._n.value_si
+                Ea = self.kinetics._Ea.value_si * 1000  # convert from J/mol to J/kmol
+                rate = ct.StickingArrheniusRate(A, b, Ea)
+                ct_reaction = ct.Reaction(equation=str(self), rate=rate)
 
 
             elif isinstance(self.kinetics, Lindemann):

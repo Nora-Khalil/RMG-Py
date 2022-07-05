@@ -152,7 +152,7 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
                 s  = obj.to_cantera()
                 for i,idx in enumerate(s):
                     reaction_data = s[i].input_data
-
+                
             else: 
                 s  = obj.to_cantera()
                 reaction_data = s.input_data
