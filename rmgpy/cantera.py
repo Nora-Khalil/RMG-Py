@@ -136,7 +136,7 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
     result_dict = dict()
 
     if isinstance(obj, Species):
-        s  = obj.to_cantera()
+        s  = obj.to_cantera(use_chemkin_identifier=True)
         species_data = s.input_data
         try: 
             result_dict['note'] = obj.transport_data.comment
@@ -149,20 +149,17 @@ def obj_to_dict(obj, spcs, names=None, label="solvent"):
         try:
 
             if isinstance(obj.kinetics, MultiArrhenius) or isinstance(obj.kinetics, MultiPDepArrhenius):
-                s  = obj.to_cantera()
+                s  = obj.to_cantera(use_chemkin_identifier=True)
                 for i,idx in enumerate(s):
                     reaction_data = s[i].input_data
                 
             else: 
-                s  = obj.to_cantera()
+                s  = obj.to_cantera(use_chemkin_identifier=True)
                 reaction_data = s.input_data
 
             if isinstance(obj.kinetics, Troe) or isinstance(obj.kinetics, Lindemann) or isinstance(obj.kinetics, ThirdBody):
                 result_dict["efficiencies"] = {spcs[i].label: float(val) for i, val in enumerate(obj.kinetics.get_effective_collider_efficiencies(spcs)) if val != 1}
 
-            reaction_data.pop('equation', None) #delete equation belonging to cantera object
-            result_dict['equation'] = str(obj)   # replace with equation that includes RMG labels, so everything is consistent 
-            
             reaction_data.update(result_dict)
             return reaction_data
 
