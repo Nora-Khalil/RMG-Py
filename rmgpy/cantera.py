@@ -64,13 +64,9 @@ phases:
         sorted_species = sorted(spcs, key=lambda spcs: spcs.index)
         species_to_write = [get_species_identifier(spec) for spec in sorted_species]
 
-        # for spec in sorted_species:
-        #     label = get_species_identifier(spec)
-        #     species_to_write.append(label)
-
         block2 = \
         f'''
-  species: {species_to_write}  
+  species: [{', '.join(species_to_write)}]
   kinetics: gas'''
 
         f.write(block2)
