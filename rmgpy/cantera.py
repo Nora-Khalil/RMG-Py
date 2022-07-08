@@ -18,7 +18,7 @@ from datetime import datetime
 from rmgpy.chemkin import get_species_identifier
 
 def write_cantera(spcs, rxns, surface_site_density=None, solvent=None, solvent_data=None, path="chem.yml"):
-    result_dict = get_mech_dict(spcs, rxns, solvent=solvent, solvent_data=solvent_data)
+    # result_dict = get_mech_dict(spcs, rxns, solvent=solvent, solvent_data=solvent_data)
 
     # intro to file will change depending on the presence of surface species
     is_surface = False
@@ -26,8 +26,11 @@ def write_cantera(spcs, rxns, surface_site_density=None, solvent=None, solvent_d
         if spc.contains_surface_site():
             is_surface=True     
     if is_surface: 
-        block1, block2, block3, block4 = write_surface_species(spcs,surface_site_density)
+        result_dict = get_mech_dict_surface(spcs, rxns, solvent=solvent, solvent_data=solvent_data)
+        block1, block2, block3, block4 = write_surface_species(spcs,rxns,surface_site_density)
     else: 
+        #get_mech_dict writes yaml files without creating separate 
+        result_dict = get_mech_dict_nonsurface(spcs, rxns, solvent=solvent, solvent_data=solvent_data)
         block1, block2, block3, block4 = write_nonsurface_species(spcs)
 
     with open(path, 'w') as f:
@@ -102,13 +105,14 @@ elements:
         return block1, block2, block3, block4 
 
 
-def write_surface_species(spcs,surface_site_density): 
+def write_surface_species(spcs,rxns, surface_site_density): 
     """
     Yaml files with surface species begin with the following blocks of text, which includes TWO 'phases' instead of just one. 
     """
     surface_species = []
     gas_species = []
     for spc in spcs: 
+
         if spc.contains_surface_site(): 
             surface_species.append(spc)
         else: 
@@ -116,14 +120,26 @@ def write_surface_species(spcs,surface_site_density):
         #Dr. West, why can't i just write the above lines as: 
             #surface_species = [spc for spc in spcs if spc.contains_surface_site()]
             #gas_species = [spc for spc in spcs if not spc.contains_surface_site()]
+
+        #VERY INTERESTING: for some reason, the sample catalysis yaml that i was looking at split up the species (surface v. gas), but when I do that, I get an error in cantera
     
     sorted_surface_species = sorted(surface_species, key=lambda surface_species: surface_species.index)
     surface_species_to_write = [get_species_identifier(surface_species) for surface_species in sorted_surface_species]
    
     sorted_gas_species = sorted(gas_species, key=lambda gas_species: gas_species.index)
     gas_species_to_write = [get_species_identifier(gas_species) for gas_species in sorted_gas_species]
-        # sorted_species = sorted(spcs, key=lambda spcs: spcs.index)
-        # species_to_write = [get_species_identifier(spec) for spec in sorted_species]
+    
+    #using this now instead because the separated species gave me errors? 
+    sorted_species = sorted(spcs, key=lambda spcs: spcs.index)
+    species_to_write = [get_species_identifier(spec) for spec in sorted_species]
+    
+    # coverage_dependencies = {}
+    # for rxn in rxns:
+    #     coverage_dependence = getattr(rxn.kinetics, 'coverage_dependence', {})
+    #     if coverage_dependence:
+    #         coverage_dependencies.update(coverage_dependence)
+
+
 
     #gas part 
     block1 = \
@@ -133,7 +149,8 @@ phases:
   thermo: ideal-gas
   elements: [H, D, T, C, Ci, O, Oi, N, Ne, Ar, He, Si, S, F, Cl, Br, I, X]
   species: [{', '.join(gas_species_to_write)}]
-  kinetics: gas'''
+  kinetics: gas
+  reactions: [gas_reactions]'''
 
 
     block2 = \
@@ -143,14 +160,13 @@ phases:
 
     block3 = \
         f''' 
-- name: {surface_species[0].smiles.replace("[","").replace("]","")}
+- name: {surface_species[0].smiles.replace("[","").replace("]","")}_surface
   thermo: ideal-surface
   adjacent-phases: [gas]
   elements: [H, D, T, C, Ci, O, Oi, N, Ne, Ar, He, Si, S, F, Cl, Br, I, X]
   species: [{', '.join(surface_species_to_write)}]
   kinetics: surface
-  reactions: all      
-  state:
+  reactions: [surface_reactions]     
   site-density: {surface_site_density * 1e-4 }
         '''
 
@@ -181,10 +197,40 @@ def get_radicals(spc):
     else:
         return spc.molecule[0].multiplicity-1
 
+def get_mech_dict_surface(spcs, rxns, solvent='solvent', solvent_data=None):
+     gas_rxns=[] 
+     surface_rxns=[]
+     for rxn in rxns: 
+        if rxn.is_surface_reaction(): 
+            surface_rxns.append(rxn)
+        else: 
+            gas_rxns.append(rxn)
+
+     names = [x.label for x in spcs]
+     for i,name in enumerate(names): #fix duplicate names
+         if names.count(name) > 1:
+             names[i] += "-"+str(names.count(name))
+
+     result_dict = dict()
+     result_dict["species"]= [obj_to_dict(x, spcs, names=names) for x in spcs]
+
+    #separate gas and surface reactions
+
+     gas_reactions = []
+     for rmg_rxn in gas_rxns:
+         gas_reactions.extend(reaction_to_dicts(rmg_rxn, spcs)) 
+     result_dict["gas_reactions"] = gas_reactions
+
+     surface_reactions = []
+     for rmg_rxn in surface_rxns:
+         surface_reactions.extend(reaction_to_dicts(rmg_rxn, spcs)) 
+     result_dict["surface_reactions"] = surface_reactions
+
+     return result_dict
 
 
-###will have to edit this section!!!
-def get_mech_dict(spcs, rxns, solvent='solvent', solvent_data=None):
+
+def get_mech_dict_nonsurface(spcs, rxns, solvent='solvent', solvent_data=None):
 
      names = [x.label for x in spcs]
      for i,name in enumerate(names): #fix duplicate names
