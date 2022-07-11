@@ -44,6 +44,7 @@ import math
 import os.path
 from copy import deepcopy
 from functools import reduce
+from sre_parse import fix_flags
 from urllib.parse import quote
 
 import cython
@@ -245,6 +246,22 @@ class Reaction:
         else:
             return rmgpy.chemkin.write_reaction_string(self)
 
+
+    def fix_reaction(self, ct_reactions, ct_products):
+        """
+        Fixes the formatting of StickingCoefficients reaction equations 
+        """    
+        rxn_stoic = [f'{v} {k}' for k,v in ct_reactions.items() if v !=1]
+        rxn_stoic.extend([k for k,v in ct_reactions.items() if v == 1])
+            
+        prod_stoic = [f'{v} {k}' for k,v in ct_products.items() if v !=1]
+        prod_stoic.extend([k for k,v in ct_products.items() if v == 1])
+
+        equation = ' + '.join(rxn_stoic) + ' <=> '  + ' + '.join(prod_stoic)
+        return equation
+
+        
+
     def to_cantera(self, species_list=None, use_chemkin_identifier=False):
         """
         Converts the RMG Reaction object to a Cantera Reaction object
@@ -281,9 +298,9 @@ class Reaction:
                 ct_products[product_name] += 1
             else:
                 ct_products[product_name] = 1
+
         if self.specific_collider:  # add a specific collider if exists
             ct_collider[self.specific_collider.to_chemkin() if use_chemkin_identifier else self.specific_collider.label] = 1
-
         if self.kinetics:
             if isinstance(self.kinetics, Arrhenius):
                 # Create an Elementary Reaction
@@ -340,7 +357,8 @@ class Reaction:
                 b = self.kinetics._n.value_si
                 Ea = self.kinetics._Ea.value_si * 1000  # convert from J/mol to J/kmol
                 rate = ct.StickingArrheniusRate(A, b, Ea)
-                ct_reaction = ct.Reaction(equation=str(self), rate=rate)
+                equation = self.fix_reaction(ct_reactants, ct_products)
+                ct_reaction = ct.Reaction(equation=equation, rate=rate)
 
 
             elif isinstance(self.kinetics, Lindemann):
@@ -377,6 +395,7 @@ class Reaction:
 
         else:
             raise Exception('Cantera reaction cannot be created because there was no kinetics.')
+
 
     def get_url(self):
         """
