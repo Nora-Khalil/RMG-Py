@@ -54,7 +54,7 @@ from rmgpy.data.kinetics.depository import KineticsDepository
 from rmgpy.data.kinetics.groups import KineticsGroups
 from rmgpy.data.kinetics.rules import KineticsRules
 from rmgpy.exceptions import ActionError, DatabaseError, InvalidActionError, KekulizationError, KineticsError, \
-                             ForbiddenStructureException, UndeterminableKineticsError
+                             ForbiddenStructureException, UndeterminableKineticsError, AtomTypeError
 from rmgpy.kinetics import Arrhenius, SurfaceArrhenius, SurfaceArrheniusBEP, StickingCoefficient, \
                            StickingCoefficientBEP, ArrheniusBM, SurfaceChargeTransfer, ArrheniusChargeTransfer, \
                            ArrheniusChargeTransferBM, KineticsModel, Marcus
@@ -1116,6 +1116,7 @@ class KineticsFamily(Database):
         For each reaction involving real reactants and products in the training
         set, add a rate rule for that reaction.
         """
+        
         if self.auto_generated:
             warnings.warn(f'add_rules_from_training should be only called for non-ATG families, '
                           f'but {self.label} is an ATG family. Skip this function call. '
@@ -1345,7 +1346,7 @@ class KineticsFamily(Database):
         If ``relabel_atoms`` is ``True``, product atom labels of reversible families
         will be reversed to assist in identifying forbidden structures.
         """
-
+       
         # There is some hardcoding of reaction families in this function, so
         # we need the label of the reaction family for this
         label = self.label.lower()
@@ -1639,7 +1640,7 @@ class KineticsFamily(Database):
             product_structures = self.apply_recipe(reactant_structures, forward=forward, relabel_atoms=relabel_atoms)
             if not product_structures:
                 return None
-        except (InvalidActionError, KekulizationError):
+        except (InvalidActionError, KekulizationError, AtomTypeError): 
             # If unable to apply the reaction recipe, then return no product structures
             return None
         except ActionError:
