@@ -3617,8 +3617,10 @@ class KineticsFamily(Database):
         index = max([e.index for e in self.rules.get_entries()] or [0]) + 1
 
         entries = list(self.groups.entries.values())
-        rxnlists = [(template_rxn_map[entry.label], entry.label)
-                    if entry.label in template_rxn_map.keys() else [] for entry in entries]
+        #rxnlists = [(template_rxn_map[entry.label], entry.label)
+        #            if entry.label in template_rxn_map.keys() else [] for entry in entries]
+        #edited rxnlists below
+        rxnlists = [(template_rxn_map[entry.label], entry.label) for entry in entries if entry.label in template_rxn_map.keys()]
         inputs = np.array([(self.forward_recipe.actions, rxns, Tref, fmax, label, [r.rank for r in rxns])
                            for rxns, label in rxnlists])
 
@@ -4627,9 +4629,10 @@ def _make_rule(rr):
     if n > 0:
         if isinstance(rxns[0].kinetics, Arrhenius):
             arr = ArrheniusBM
-        else:
-            arr = ArrheniusChargeTransferBM
+        # else:
+        #     arr = ArrheniusChargeTransferBM
         kin = arr().fit_to_reactions(rxns, recipe=recipe)
+        print(kin.E0.value_si, kin.A.value_si, abs(kin.n.value_si))
         if kin.E0.value_si < 0.0 or kin.A.value_si > 1.0e30 or abs(kin.n.value_si) > 5.0:
             kin = average_kinetics([r.kinetics for r in rxns])
             kin.comment = "E0<0 in the Arrhenius BM fit. Instead averaged from {} reactions.".format(n)
@@ -4670,14 +4673,14 @@ def _make_rule(rr):
                             .get_rate_coefficient(T=Tref) / rxn.get_rate_coefficient(T=Tref)
                         ) for i, rxn in enumerate(rxns)
                     ])  # 1) fit to set of reactions without the current reaction (k)  2) compute log(kfit/kactual) at Tref
-            varis = (np.array([rank_accuracy_map[rxn.rank].value_si for rxn in rxns]) / (2.0 * 8.314 * Tref)) ** 2
-            # weighted average calculations
-            ws = 1.0 / varis
-            V1 = ws.sum()
-            V2 = (ws ** 2).sum()
-            mu = np.dot(ws, dlnks) / V1
-            s = np.sqrt(np.dot(ws, (dlnks - mu) ** 2) / (V1 - V2 / V1))
-            kin.uncertainty = RateUncertainty(mu=mu, var=s ** 2, N=n, Tref=Tref, data_mean=data_mean, correlation=label)
+                varis = (np.array([rank_accuracy_map[rxn.rank].value_si for rxn in rxns]) / (2.0 * 8.314 * Tref)) ** 2
+                # weighted average calculations
+                ws = 1.0 / varis
+                V1 = ws.sum()
+                V2 = (ws ** 2).sum()
+                mu = np.dot(ws, dlnks) / V1
+                s = np.sqrt(np.dot(ws, (dlnks - mu) ** 2) / (V1 - V2 / V1))
+                kin.uncertainty = RateUncertainty(mu=mu, var=s ** 2, N=n, Tref=Tref, data_mean=data_mean, correlation=label)
         return kin
     else:
         return None
@@ -4722,11 +4725,11 @@ def average_kinetics(kinetics_list):
     Ea = 0.0
     alpha = 0.5
     electrons = None
-    if isinstance(kinetics_list[0], SurfaceChargeTransfer) or isinstance(kinetics_list[0], ArrheniusChargeTransfer):
-        if electrons is None:
-            electrons = kinetics_list[0].electrons.value_si
-        assert all(np.abs(k.V0.value_si) < 0.0001 for k in kinetics_list), [k.V0.value_si for k in kinetics_list]
-        assert all(np.abs(k.alpha.value_si - 0.5) < 0.001 for k in kinetics_list), [k.alpha for k in kinetics_list]
+    # if isinstance(kinetics_list[0], SurfaceChargeTransfer) or isinstance(kinetics_list[0], ArrheniusChargeTransfer):
+    #     if electrons is None:
+    #         electrons = kinetics_list[0].electrons.value_si
+    #     assert all(np.abs(k.V0.value_si) < 0.0001 for k in kinetics_list), [k.V0.value_si for k in kinetics_list]
+    #     assert all(np.abs(k.alpha.value_si - 0.5) < 0.001 for k in kinetics_list), [k.alpha for k in kinetics_list]
     V0 = 0.0
     count = 0
     for kinetics in kinetics_list:
@@ -4759,31 +4762,31 @@ def average_kinetics(kinetics_list):
     else:
         raise Exception('Invalid units {0} for averaging kinetics.'.format(Aunits))
 
-    if type(kinetics) not in [Arrhenius,SurfaceChargeTransfer,ArrheniusChargeTransfer]:
+    if type(kinetics) not in [Arrhenius]:#,SurfaceChargeTransfer,ArrheniusChargeTransfer]:
         raise Exception('Invalid kinetics type {0!r} for {1!r}.'.format(type(kinetics), self))
 
-    if isinstance(kinetics, SurfaceChargeTransfer):
-        averaged_kinetics = SurfaceChargeTransfer(
-            A=(10 ** logA, Aunits),
-            n=n,
-            electrons=electrons,
-            alpha=alpha,
-            V0=(V0,'V'),
-            Ea=(Ea * 0.001, "kJ/mol"),
-            )
-    elif isinstance(kinetics, ArrheniusChargeTransfer):
-        averaged_kinetics = ArrheniusChargeTransfer(
-            A=(10 ** logA, Aunits),
-            n=n,
-            electrons=electrons,
-            alpha=alpha,
-            V0=(V0,'V'),
-            Ea=(Ea * 0.001, "kJ/mol"),
-            )
-    else:
-        averaged_kinetics = Arrhenius(
-            A=(10 ** logA, Aunits),
-            n=n,
-            Ea=(Ea * 0.001, "kJ/mol"),
+    # if isinstance(kinetics, SurfaceChargeTransfer):
+    #     averaged_kinetics = SurfaceChargeTransfer(
+    #         A=(10 ** logA, Aunits),
+    #         n=n,
+    #         electrons=electrons,
+    #         alpha=alpha,
+    #         V0=(V0,'V'),
+    #         Ea=(Ea * 0.001, "kJ/mol"),
+    #         )
+    # elif isinstance(kinetics, ArrheniusChargeTransfer):
+    #     averaged_kinetics = ArrheniusChargeTransfer(
+    #         A=(10 ** logA, Aunits),
+    #         n=n,
+    #         electrons=electrons,
+    #         alpha=alpha,
+    #         V0=(V0,'V'),
+    #         Ea=(Ea * 0.001, "kJ/mol"),
+    #         )
+    # else:
+    averaged_kinetics = Arrhenius(
+        A=(10 ** logA, Aunits),
+        n=n,
+        Ea=(Ea * 0.001, "kJ/mol"),
         )
     return averaged_kinetics
