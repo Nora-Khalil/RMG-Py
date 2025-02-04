@@ -3734,16 +3734,17 @@ class KineticsFamily(Database):
                 if L != []:
                     if isinstance(L[0].kinetics, Arrhenius):
                         kinetics = ArrheniusBM().fit_to_reactions(L, recipe=self.forward_recipe.actions)
-                        if kinetics.E0.value_si < 0.0 or len(L) == 1:
+                        #if kinetics.E0.value_si < 0.0 or len(L) == 1:
+                        if kinetics.E0.value_si < 0.0 or kinetics.A.value_si > 1.0e30 or abs(kinetics.n.value_si) > 5.0:
                             kinetics = average_kinetics([r.kinetics for r in L])
                         else:
                             kinetics = kinetics.to_arrhenius(rxn.get_enthalpy_of_reaction(298.0))
-                    else:
-                        kinetics = ArrheniusChargeTransferBM().fit_to_reactions(L, recipe=self.forward_recipe.actions)
-                        if kinetics.E0.value_si < 0.0 or len(L) == 1:
-                            kinetics = average_kinetics([r.kinetics for r in L])
-                        else:
-                            kinetics = kinetics.to_arrhenius_charge_transfer(rxn.get_enthalpy_of_reaction(298.0))
+                    # else:
+                    #     kinetics = ArrheniusChargeTransferBM().fit_to_reactions(L, recipe=self.forward_recipe.actions)
+                    #     if kinetics.E0.value_si < 0.0 or len(L) == 1:
+                    #         kinetics = average_kinetics([r.kinetics for r in L])
+                    #     else:
+                    #         kinetics = kinetics.to_arrhenius_charge_transfer(rxn.get_enthalpy_of_reaction(298.0))
 
                     k = kinetics.get_rate_coefficient(T)
                     errors[rxn] = np.log(k / krxn)
