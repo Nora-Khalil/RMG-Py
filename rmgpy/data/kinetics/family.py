@@ -3621,7 +3621,7 @@ class KineticsFamily(Database):
                     if entry.label in template_rxn_map.keys() else [] for entry in entries]
         #inputs = np.array([(self.forward_recipe.actions, rxns, Tref, fmax, label, [r.rank for r in rxns])
         #                   for rxns, label in rxnlists])
-         inputs = [(self.forward_recipe.actions, rxns, Tref, fmax, label, [r.rank for r in rxns])
+        inputs = [(self.forward_recipe.actions, rxns, Tref, fmax, label, [r.rank for r in rxns])
                            for rxns, label in rxnlists]
 
         inds = np.arange(len(inputs))
